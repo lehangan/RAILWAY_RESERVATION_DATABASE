@@ -1,6 +1,6 @@
 COPY passenger FROM 'E:\railway_project_database_sql\data\passenger.txt' WITH DELIMITER E'\t';
 COPY train FROM 'E:\railway_project_database_sql\data\train.txt' WITH DELIMITER E',';
-
+COPY stop FROM 'E:\railway_project_database_sql\data\stop.txt' WITH DELIMITER E',';
 ------------------------------
 
 INSERT INTO station(station_id, station_name, city) VALUES
