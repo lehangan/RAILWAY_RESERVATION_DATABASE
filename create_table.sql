@@ -63,8 +63,8 @@ create table reservation(
 	ticket_id integer,
 	passenger_id integer,
 	reservation_date timestamp not null,
-	arrival_no varchar(20) not null,
-	departure_no varchar(20) not null,
+	arrival_no integer not null,
+	departure_no integer not null,
 	foreign key (ticket_id) references ticket(ticket_id),
 	foreign key (passenger_id) references passenger(passenger_id),
 	primary key(ticket_id, passenger_id)
