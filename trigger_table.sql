@@ -54,7 +54,7 @@ BEGIN
         FROM seat
         WHERE train_id = NEW.train_id
         GROUP BY coach
-        HAVING COUNT(*) > 60
+        HAVING COUNT(*) > 59
     ) subquery;
 
     IF (c > 0) THEN
