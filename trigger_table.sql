@@ -70,3 +70,37 @@ CREATE OR REPLACE TRIGGER trigger_unable_to_insert_seat
 BEFORE INSERT ON seat
 FOR EACH ROW
 EXECUTE PROCEDURE unable_to_insert_seat();
+
+--3. Trigger don't allow insert train_schedule when have conflict 
+
+CREATE OR REPLACE FUNCTION train_schedule_problem()
+RETURNS TRIGGER LANGUAGE plpgsql
+AS $$
+DECLARE 
+	a record;
+BEGIN
+	for a in ( select arrival_time, departure_time, train_schedule.train_id, track_number
+				from train_schedule
+			  	where new.train_id != train_id
+			  	and train_schedule.track_number = new.track_number
+			    and (
+					cast(train_schedule.arrival_time as date) = cast(new.arrival_time as date)
+			  		or cast(train_schedule.departure_time as date) = cast(new.departure_time as date)
+				)
+			 ) loop
+		if( ( cast(a.arrival_time as time), cast(a.departure_time as time) )
+		   	overlaps ( cast(new.departure_time as time), cast(new.arrival_time as time) ) 
+		  ) then 
+			raise notice 'Overlap detected: train_id=%, track_number=%, arrival_time=%, departure_time=%',
+      			NEW.train_id, NEW.track_number, NEW.arrival_time, NEW.departure_time ; 
+			return null;
+		end if;
+	end loop;
+	return new;
+END
+$$;
+
+CREATE OR REPLACE TRIGGER solve_train_schedule_problem
+BEFORE INSERT ON train_schedule
+FOR EACH ROW
+EXECUTE PROCEDURE train_schedule_problem();
