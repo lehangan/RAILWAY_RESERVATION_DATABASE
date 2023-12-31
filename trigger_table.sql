@@ -33,8 +33,7 @@ EXECUTE PROCEDURE add_seat();
 
 --2. Trigger don't allow to add seat when total seat exceed or total seat by coach exceed 
 CREATE OR REPLACE FUNCTION unable_to_insert_seat()
-RETURNS TRIGGER
-LANGUAGE plpgsql
+RETURNS TRIGGER LANGUAGE plpgsql
 AS 
 $$
 DECLARE 
@@ -137,3 +136,28 @@ CREATE OR REPLACE TRIGGER at_least_15_miniute
 BEFORE INSERT ON train_schedule
 FOR EACH ROW
 EXECUTE PROCEDURE train_schedule_minutes_atleast();
+
+
+--5. Trigger to check when insert ticket train_id in seat and train_id in schedule are the same
+CREATE OR REPLACE FUNCTION check_train_id_match()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT s.seat_id
+    FROM seat s, train_schedule ts
+    WHERE s.seat_id = NEW.seat_id 
+	AND ts.schedule_id = NEW.schedule_id
+	AND ts.train_id = s.train_id
+  ) THEN
+    RAISE EXCEPTION 'This train do not have this schedule';
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_check_train_id_match
+BEFORE INSERT ON ticket
+FOR EACH ROW
+EXECUTE FUNCTION check_train_id_match();
+

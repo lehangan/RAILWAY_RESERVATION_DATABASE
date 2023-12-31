@@ -19,6 +19,103 @@ COPY train FROM 'E:\railway_project_database_sql\data\train.txt' WITH DELIMITER 
 COPY stop FROM 'E:\railway_project_database_sql\data\stop.txt' WITH DELIMITER E',';
 COPY train_schedule FROM 'E:\railway_project_database_sql\data\train_schedule2.txt' WITH DELIMITER E'\t';
  
+insert into train_schedule(arrival_time, departure_time, track_number, station_to_id, station_from_id, train_id)
+values
+('1/1/2024 6:00','1/1/2024 5:45',3,	'LOB', 'HAN',11),
+('1/1/2024 6:30','1/1/2024 6:10',3,	'GLA',	'LOB',11)
+
+INSERT INTO station(station_id, station_name, city) VALUES
+('HAN' , 'Ha Noi' , 'Ha Noi'),
+('LOB' , 'Long Bien' , 'Ha Noi'),
+('GLA' , 'Gia Lam' , 'Ha Noi'),
+('HAD' , 'Hai Duong' , 'Hai Duong'),
+('HAP' , 'Hai Phong', ' Hai Phong'),
+('PUT' , 'Phu Tho' , 'Phu Tho'),
+('YEB' , 'Yen Bai' , 'Yen Bai'),
+('LAC' , 'Lao Cai' , 'Lao Cai'),
+('NAD' , 'Nam Dinh' , 'Nam Dinh'),
+('NIB' , 'Ninh Binh' , 'Ninh Binh'),
+('THA' , 'Thanh Hoa' , 'Thanh Hoa'),
+('VIN' , 'Vinh' , 'Nghe An'),
+('DOH' , 'Dong Hoi' , 'Quang Binh'),
+('HUE' , 'Hue' , 'Hue'),
+('DAN' , 'Da Nang' , 'Da Nang'),
+('QNGA' , 'Quang Ngai' , 'Quang Ngai'),
+('QNHO' , 'Quy Nhon' , 'Quy Nhon'),
+('TUH' , 'Tuy Hoa' , 'Phu Yen'),
+('NHT' , 'Nha Trang' , 'Khanh Hoa'),
+('PAT' , 'Phan Thiet' , 'Binh Thuạn'),
+('BTH' , 'Binh Thuan' , 'Binh Thuan'),
+('BHO' , 'Bien Hoa' , 'Dong Nai'),
+('SGO' , 'Sai Gon' , 'Sai Gon')
+
+insert into ticket(price, ticket_type, schedule_id, seat_id) values
+(50000, 'Student', 1, 1)
+
+-- 1. Auto insert reservation when insert new ticket
+CREATE OR REPLACE FUNCTION insert_reservation()
+RETURNS TRIGGER AS 
+$$
+DECLARE 
+	a integer;
+	b integer;
+BEGIN
+	INSERT INTO reservation(ticket_id, passenger_id, )
+	RETURN NEW;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER trigger_add_seat
+AFTER INSERT ON ticket
+FOR EACH ROW
+EXECUTE PROCEDURE add_seat();
+-----------------------------------------------------
+
+CREATE 
+
+CREATE OR REPLACE FUNCTION check_train_id_match()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT s.seat_id
+    FROM seat s, train_schedule ts
+    WHERE s.seat_id = NEW.seat_id 
+	AND ts.schedule_id = NEW.schedule_id
+	AND ts.train_id = s.train_id
+  ) THEN
+    RAISE EXCEPTION 'This train do not have this schedule';
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_check_train_id_match
+BEFORE INSERT ON ticket
+FOR EACH ROW
+EXECUTE FUNCTION check_train_id_match();
+
+
+--------------------------------------------
+
+CREATE OR REPLACE FUNCTION client_get_schedule(schedule_id integer, day date)
+RETURNS setof train_schedule AS
+$$
+BEGIN
+	RETURN QUERY
+	SELECT *
+	FROM train_schedule ts
+	WHERE ts.schedule_id=$1 AND cast(ts.departure_time as date) =$2;
+END;
+$$
+LANGUAGE plpgsql;
+select client_get_schedule(1, '2024-01-01');
+
+drop function client_get_schedule(integer,date )
+
+select extract(dow from date('2024-01-01'))
+
 select * from train_schedule 
 where cast(arrival_time as time) > '7:00:00'
 AND cast(arrival_time as time) <= '11:30:00'
@@ -58,7 +155,48 @@ INSERT INTO station(station_id, station_name, city) VALUES
 ('BHO' , 'Bien Hoa' , 'Dong Nai'),
 ('SGO' , 'Sai Gon' , 'Sai Gon')
 
+----------------------------------------------
+SELECT
+        train_id,
+        station_id,
+        ROW_NUMBER() OVER (PARTITION BY train_id ORDER BY no) AS station_order
+FROM stop
+	
+CREATE OR REPLACE FUNCTION insert_reservation()
+RETURNS TRIGGER LANGUAGE plpgsql
+AS $$
+DECLARE 
+	a record;
+BEGIN
+	for a in ( select arrival_time, departure_time, train_schedule.train_id, track_number
+				from train_schedule
+			  	where new.train_id != train_id
+			  	and train_schedule.track_number = new.track_number
+			    and (
+					cast(train_schedule.arrival_time as date) = cast(new.arrival_time as date)
+			  		or cast(train_schedule.departure_time as date) = cast(new.departure_time as date)
+				)
+			 ) loop
+		if( ( cast(a.arrival_time as time), cast(a.departure_time as time) )
+		   	overlaps ( cast(new.departure_time as time), cast(new.arrival_time as time) ) 
+		  ) then 
+			raise notice 'Overlap detected: train_id=%, track_number=%, arrival_time=%, departure_time=%',
+      			NEW.train_id, NEW.track_number, NEW.arrival_time, NEW.departure_time ; 
+			return null;
+		end if;
+	end loop;
+	return new;
+END
+$$;
+
+CREATE OR REPLACE TRIGGER solve_train_schedule_problem
+BEFORE INSERT ON train_schedule
+FOR EACH ROW
+EXECUTE PROCEDURE train_schedule_problem();
+
 --3. Trigger don't allow insert train_schedule when have conflict 
+
+select * from train_schedule
 
 CREATE OR REPLACE FUNCTION train_schedule_problem()
 RETURNS TRIGGER LANGUAGE plpgsql
@@ -67,17 +205,19 @@ DECLARE
 	a record;
 BEGIN
 	for a in ( select arrival_time, departure_time, train_schedule.train_id, track_number
-				from train_schedule, train
-				where train.train_id = train_schedule.train_id
-			  	and train_schedule.train_id != new.train_id 
+				from train_schedule
+			  	where new.train_id != train_id
 			  	and train_schedule.track_number = new.track_number
-			    and cast(train_schedule.arrival_time as date) = cast(new.arrival_time as date)
-			  	or cast(train_schedule.departure_time as date) = cast(new.departure_time as date)
+			    and (
+					cast(train_schedule.arrival_time as date) = cast(new.arrival_time as date)
+			  		or cast(train_schedule.departure_time as date) = cast(new.departure_time as date)
+				)
 			 ) loop
-		if( ( cast(a.departure_time as time), cast(a.departure_time as time) )
+		if( ( cast(a.arrival_time as time), cast(a.departure_time as time) )
 		   	overlaps ( cast(new.departure_time as time), cast(new.arrival_time as time) ) 
 		  ) then 
-			raise notice 'The train_schedule conflicts with another one:';
+			raise notice 'Overlap detected: train_id=%, track_number=%, arrival_time=%, departure_time=%',
+      			NEW.train_id, NEW.track_number, NEW.arrival_time, NEW.departure_time ; 
 			return null;
 		end if;
 	end loop;
@@ -85,15 +225,98 @@ BEGIN
 END
 $$;
 
-drop trigger if EXISTS train_schedule_problem on train_schedule
 CREATE OR REPLACE TRIGGER solve_train_schedule_problem
 BEFORE INSERT ON train_schedule
 FOR EACH ROW
 EXECUTE PROCEDURE train_schedule_problem();
 
+--4. Trigger don't allow insert train_schedule when not having enough time for passenger
+
+select time '8:45:00' - time '8:30:00' >= interval '15 minutes'
+
+select * from train_schedule
+
+CREATE OR REPLACE FUNCTION train_schedule_minutes_atleast()
+RETURNS TRIGGER LANGUAGE plpgsql
+AS $$
+DECLARE 
+	a record;
+BEGIN
+	for a in ( select arrival_time, departure_time, train_schedule.train_id, track_number
+				from train_schedule
+			  	where train_id = new.train_id
+			  	and train_schedule.track_number = new.track_number
+			    and (
+					cast(train_schedule.arrival_time as date) = cast(new.arrival_time as date)
+			  		and cast(train_schedule.departure_time as date) = cast(new.departure_time as date)
+				)
+			  	and station_to_id = new.station_from_id
+			 ) loop
+		if( cast (new.departure_time as time) - cast(a.arrival_time as time) < interval '15 minutes' ) then 
+			raise notice 'Not enough time for passenger: % < 15 minutes',  (cast (new.departure_time as time) - cast(a.arrival_time as time)) ; 
+			return null;
+		end if;
+	end loop;
+	return new;
+END
+$$;
+
+CREATE OR REPLACE TRIGGER at_least_15_miniute
+BEFORE INSERT ON train_schedule
+FOR EACH ROW
+EXECUTE PROCEDURE train_schedule_minutes_atleast();
+
+
+drop trigger solve_train_schedule_problem on train_schedule
+
+-------------------------------------------
+
+-- Create a function to check for overlapping time intervals
+-- Create a function to check for overlapping time intervals
+CREATE OR REPLACE FUNCTION check_overlap()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF EXISTS (
+    SELECT *
+    FROM train_schedule
+    WHERE
+      train_schedule.train_id != NEW.train_id
+      AND train_schedule.track_number = NEW.track_number
+      AND (
+        cast(train_schedule.arrival_time as date) = cast(new.arrival_time as date)
+			  		or cast(train_schedule.departure_time as date) = cast(new.departure_time as date)
+      )
+	  AND ( ( cast(departure_time as time), cast(arrival_time as time) )
+		   	overlaps ( cast(new.departure_time as time), cast(new.arrival_time as time) ) )
+  ) THEN
+    RAISE EXCEPTION 'Overlap detected: train_id=%, track_number=%, arrival_time=%, departure_time=%',
+      NEW.train_id, NEW.track_number, NEW.arrival_time, NEW.departure_time;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Create a trigger to call the check_overlap function before insert
+CREATE TRIGGER before_insert_check_overlap
+BEFORE INSERT ON train_schedule
+FOR EACH ROW
+EXECUTE FUNCTION check_overlap();
+
+drop trigger before_insert_check_overlap on train_schedule
+
 insert into train_schedule(arrival_time, departure_time, track_number, station_to_id, station_from_id , train_id) 
 values
-('1/1/2024 6:15','1/1/2024 6:00',1,'LOB','HAN',1)
+('1/1/2024 6:15','1/1/2024 6:00',1,'LOB','HAN',2)
+
+select * 
+from train_schedule
+where train_id != 2 
+and track_number = 1
+and ( cast(train_schedule.arrival_time as date) = '1/1/2024'
+		or cast(train_schedule.departure_time as date) = '1/1/2024' )
+and (( cast(departure_time as time), cast(departure_time as time) )
+		   	overlaps ( cast(new.departure_time as time), cast(new.arrival_time as time) ))
+					
 
 insert into train(train_name) values
 ('HN100')
