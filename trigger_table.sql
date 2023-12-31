@@ -30,6 +30,7 @@ AFTER INSERT ON train
 FOR EACH ROW
 EXECUTE PROCEDURE add_seat();
 
+
 --2. Trigger don't allow to add seat when total seat exceed or total seat by coach exceed 
 CREATE OR REPLACE FUNCTION unable_to_insert_seat()
 RETURNS TRIGGER
@@ -71,8 +72,8 @@ BEFORE INSERT ON seat
 FOR EACH ROW
 EXECUTE PROCEDURE unable_to_insert_seat();
 
---3. Trigger don't allow insert train_schedule when have conflict 
 
+--3. Trigger don't allow insert train_schedule when have conflict 
 CREATE OR REPLACE FUNCTION train_schedule_problem()
 RETURNS TRIGGER LANGUAGE plpgsql
 AS $$
@@ -104,3 +105,35 @@ CREATE OR REPLACE TRIGGER solve_train_schedule_problem
 BEFORE INSERT ON train_schedule
 FOR EACH ROW
 EXECUTE PROCEDURE train_schedule_problem();
+
+
+--4. Trigger don't allow insert train_schedule when not having enough time for passenger
+CREATE OR REPLACE FUNCTION train_schedule_minutes_atleast()
+RETURNS TRIGGER LANGUAGE plpgsql
+AS $$
+DECLARE 
+	a record;
+BEGIN
+	for a in ( select arrival_time, departure_time, train_schedule.train_id, track_number
+				from train_schedule
+			  	where train_id = new.train_id
+			  	and train_schedule.track_number = new.track_number
+			    and (
+					cast(train_schedule.arrival_time as date) = cast(new.arrival_time as date)
+			  		and cast(train_schedule.departure_time as date) = cast(new.departure_time as date)
+				)
+			  	and station_to_id = new.station_from_id
+			 ) loop
+		if( cast (new.departure_time as time) - cast(a.arrival_time as time) < interval '15 minutes' ) then 
+			raise notice 'Not enough time for passenger: % < 15 minutes',  (cast (new.departure_time as time) - cast(a.arrival_time as time)) ; 
+			return null;
+		end if;
+	end loop;
+	return new;
+END
+$$;
+
+CREATE OR REPLACE TRIGGER at_least_15_miniute
+BEFORE INSERT ON train_schedule
+FOR EACH ROW
+EXECUTE PROCEDURE train_schedule_minutes_atleast();
