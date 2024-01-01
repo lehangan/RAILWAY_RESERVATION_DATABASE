@@ -137,6 +137,7 @@ LANGUAGE plpgsql;
 
 select * from get_seat_empty(2);
 
+select book_ticket(1,1,1);
 --- MAKE_RESERVATION
 
 CREATE OR REPLACE FUNCTION check_available_seat_in_schedule(p_schedule_id int, p_seat_id int)
@@ -164,3 +165,4 @@ BEGIN
 	end if;
 END
 $$;
+

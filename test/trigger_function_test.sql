@@ -75,9 +75,38 @@ INSERT INTO station(station_id, station_name, city) VALUES
 ('BHO' , 'Bien Hoa' , 'Dong Nai'),
 ('SGO' , 'Sai Gon' , 'Sai Gon');
 
-insert into ticket(price, ticket_type, schedule_id, seat_id) values
-(50000, 'Student', 1, 1)
+insert into ticket(price, ticket_type, schedule_id, seat_id, arrival_no, departure_no, passenger_id) values
+(50000, 'Student', 1, 1, 2, 1, 1)
 
+select delete_ticket(1);
+CREATE OR REPLACE FUNCTION delete_ticket(ticket_id_arg integer)
+RETURNS void AS $$
+BEGIN
+    -- Delete from the ticket table
+    DELETE FROM ticket WHERE ticket_id = ticket_id_arg;
+
+END;
+$$ LANGUAGE plpgsql;
+
+drop function get_history_booking(int);
+CREATE OR REPLACE FUNCTION get_history_booking(p_id int)
+RETURNS TABLE(
+	ticket_id int,
+	price int, 
+	ticket_type varchar(40),
+	seat_id int
+)AS
+$$
+BEGIN 
+    RETURN QUERY
+    SELECT t.ticket_id, t.price, t.ticket_type, t.seat_id
+    FROM ticket t
+    WHERE p_id = t.passenger_id;
+END
+$$
+LANGUAGE plpgsql;
+
+select * from get_history_booking(1);
 ----------------------
 
 CREATE OR REPLACE FUNCTION check_train_id_match()

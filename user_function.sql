@@ -182,10 +182,17 @@ DECLARE
     price_ticket integer;
     ticket_type1 varchar;
     ages integer;
-   
+    from_no integer;
+	to_no integer;
 BEGIN
     standard_price := take_price(schedule_id1);
-
+	
+	SELECT s1.no, s2.no from_no, to_no
+	FROM train_schedule ts, stop s1, stop s2
+	WHERE ts.schedule_id = p_schedule_id
+	AND ts.train_id = s1.train_id AND ts.station_from_id = s1.station_id
+	AND ts.train_id = s2.train_id AND ts.station_to_id = s2.station_id;
+	
     SELECT EXTRACT(YEAR FROM AGE(NOW(), dob)) INTO ages
     FROM passenger
     WHERE passenger_id = passenger_id1;
@@ -205,8 +212,8 @@ BEGIN
     END IF;
 
     -- Insert into the ticket table
-    INSERT INTO ticket(price, ticket_type, schedule_id, seat_id, passenger_id)
-    VALUES (price_ticket, ticket_type1, schedule_id1, seat_id1, passenger_id1);
+    INSERT INTO ticket(price, ticket_type, schedule_id, seat_id, arrival_no, departure_no, passenger_id)
+    VALUES (price_ticket, ticket_type1, schedule_id1, seat_id1,from_no, to_no, passenger_id1);
 END;
 $$
 LANGUAGE plpgsql;
