@@ -60,4 +60,20 @@ END;
 $$
 LANGUAGE plpgsql;
 
---3. 
+--3. Function to get all seat are empty with schedule_id
+CREATE OR REPLACE FUNCTION get_seat_empty(schedule_id integer)
+RETURNS TABLE(
+	seat_id integer,
+	seat_coach integer,
+	seat_number integer
+) AS
+$$
+BEGIN
+	RETURN QUERY
+	SELECT A.seat_id, A.seat_coach, A.seat_number
+	FROM get_seat_all($1) A 
+	LEFT JOIN get_seat_booked($1) B ON A.seat_id=B.seat_id
+	WHERE B.seat_id IS NULL;
+END;
+$$
+LANGUAGE plpgsql;
