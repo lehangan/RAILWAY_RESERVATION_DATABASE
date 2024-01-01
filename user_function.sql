@@ -39,7 +39,7 @@ BEGIN
     WHERE station_from_id = from_name AND station_to_id = to_name AND date(arrival_time) = depart_time;
 END
 $$
-LANGUAGE plpgsql
+LANGUAGE plpgsql;
 
 ---3. Function to get all seat with schedule id
 CREATE OR REPLACE FUNCTION get_seat_all(schedule_id integer)

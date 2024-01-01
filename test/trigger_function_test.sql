@@ -18,6 +18,12 @@ drop table ticket;
 alter table seat
 drop constraint fk_seat_train_id ;
 
+ALTER TABLE passenger 
+ADD CONSTRAINT constraint_phone UNIQUE (phone);
+
+ALTER TABLE passenger 
+ADD CONSTRAINT constraint_email UNIQUE (email);
+
 alter table train_schedule
 drop constraint fk_train_schedule_train_id ;
 

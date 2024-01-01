@@ -1,12 +1,3 @@
-
--- Add constraint to email and phone 
-ALTER TABLE passenger 
-ADD CONSTRAINT constraint_phone UNIQUE (phone);
-
-ALTER TABLE passenger 
-ADD CONSTRAINT constraint_email UNIQUE (email);
-
-
 --1. Sign Up function for passenger to have information to book ticket
 CREATE OR REPLACE FUNCTION Sign_Up(phone1 varchar, email1 varchar, password1 varchar, name1 varchar, dob1 date)
 RETURNS void AS
