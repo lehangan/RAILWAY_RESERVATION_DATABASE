@@ -54,7 +54,7 @@ BEGIN
         FROM seat
         WHERE train_id = NEW.train_id
         GROUP BY coach
-        HAVING COUNT(*) > 59
+        HAVING COUNT(*) > 60
     ) subquery;
 
     IF (c > 0) THEN
@@ -138,50 +138,50 @@ FOR EACH ROW
 EXECUTE PROCEDURE train_schedule_minutes_atleast();
 
 
---5. Trigger to check when insert ticket train_id in seat and train_id in schedule are the same
-CREATE OR REPLACE FUNCTION check_train_id_match()
-RETURNS TRIGGER AS $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT s.seat_id
-    FROM seat s, train_schedule ts
-    WHERE s.seat_id = NEW.seat_id 
-	AND ts.schedule_id = NEW.schedule_id
-	AND ts.train_id = s.train_id
-  ) THEN
-    RAISE EXCEPTION 'This train do not have this schedule';
-  END IF;
+-- --5. Trigger to check when insert ticket train_id in seat and train_id in schedule are the same
+-- CREATE OR REPLACE FUNCTION check_train_id_match()
+-- RETURNS TRIGGER AS $$
+-- BEGIN
+--   IF NOT EXISTS (
+--     SELECT s.seat_id
+--     FROM seat s, train_schedule ts
+--     WHERE s.seat_id = NEW.seat_id 
+-- 	AND ts.schedule_id = NEW.schedule_id
+-- 	AND ts.train_id = s.train_id
+--   ) THEN
+--     RAISE EXCEPTION 'This train do not have this schedule';
+--   END IF;
 
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+--   RETURN NEW;
+-- END;
+-- $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER before_insert_check_train_id_match
-BEFORE INSERT ON ticket
-FOR EACH ROW
-EXECUTE FUNCTION check_train_id_match();
+-- CREATE TRIGGER before_insert_check_train_id_match
+-- BEFORE INSERT ON ticket
+-- FOR EACH ROW
+-- EXECUTE FUNCTION check_train_id_match();
 
 
---6. Check overlap arrival_no and departure_no when insert reservation
-CREATE OR REPLACE FUNCTION check_overlap()
-RETURNS TRIGGER AS $$
-DECLARE
-  overlap_count INTEGER;
-BEGIN
-  SELECT COUNT(*) INTO overlap_count
-  FROM reservation r
-  JOIN ticket t ON r.ticket_id = t.ticket_id
-  JOIN train_schedule ts1 ON t.schedule_id = ts1.schedule_id
-  JOIN stop s1 ON ts1.station_from_id = s1.station_id AND ts1.train_id = s1.train_id
-  JOIN stop s2 ON ts1.station_to_id = s2.station_id AND ts1.train_id = s2.train_id
-  WHERE NOT( s2.no <= new.departure_no OR new.arrival_no <= s1.no );
-  IF overlap_count > 0 THEN
-    RAISE EXCEPTION 'The new reservation overlaps with an existing reservation for the same train.';
-  END IF;
+-- --6. Check overlap arrival_no and departure_no when insert reservation
+-- CREATE OR REPLACE FUNCTION check_overlap()
+-- RETURNS TRIGGER AS $$
+-- DECLARE
+--   overlap_count INTEGER;
+-- BEGIN
+--   SELECT COUNT(*) INTO overlap_count
+--   FROM reservation r
+--   JOIN ticket t ON r.ticket_id = t.ticket_id
+--   JOIN train_schedule ts1 ON t.schedule_id = ts1.schedule_id
+--   JOIN stop s1 ON ts1.station_from_id = s1.station_id AND ts1.train_id = s1.train_id
+--   JOIN stop s2 ON ts1.station_to_id = s2.station_id AND ts1.train_id = s2.train_id
+--   WHERE NOT( s2.no <= new.departure_no OR new.arrival_no <= s1.no );
+--   IF overlap_count > 0 THEN
+--     RAISE EXCEPTION 'The new reservation overlaps with an existing reservation for the same train.';
+--   END IF;
 
-  RETURN NEW;
-END; $$ LANGUAGE plpgsql;
+--   RETURN NEW;
+-- END; $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE TRIGGER reservation_insert_trigger
-BEFORE INSERT ON reservation
-FOR EACH ROW EXECUTE FUNCTION check_overlap();
+-- CREATE OR REPLACE TRIGGER reservation_insert_trigger
+-- BEFORE INSERT ON reservation
+-- FOR EACH ROW EXECUTE FUNCTION check_overlap();
