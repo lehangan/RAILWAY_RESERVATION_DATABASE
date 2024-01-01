@@ -52,27 +52,7 @@ INSERT INTO station(station_id, station_name, city) VALUES
 insert into ticket(price, ticket_type, schedule_id, seat_id) values
 (50000, 'Student', 1, 1)
 
--- 1. Auto insert reservation when insert new ticket
-CREATE OR REPLACE FUNCTION insert_reservation()
-RETURNS TRIGGER AS 
-$$
-DECLARE 
-	a integer;
-	b integer;
-BEGIN
-	INSERT INTO reservation(ticket_id, passenger_id, )
-	RETURN NEW;
-END;
-$$
-LANGUAGE plpgsql;
-
-CREATE OR REPLACE TRIGGER trigger_add_seat
-AFTER INSERT ON ticket
-FOR EACH ROW
-EXECUTE PROCEDURE add_seat();
------------------------------------------------------
-
-CREATE 
+----------------------
 
 CREATE OR REPLACE FUNCTION check_train_id_match()
 RETURNS TRIGGER AS $$
