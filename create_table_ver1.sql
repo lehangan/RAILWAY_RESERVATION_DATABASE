@@ -54,13 +54,20 @@ create table ticket(
 	ticket_type varchar(40) not null,
 	schedule_id integer not null,
 	seat_id integer not null,
-    arrival_no integer not null,
-    departure_no integer not null,
-	passenger_id integer not null,
-	foreign key (passenger_id) references passenger(passenger_id),
 	foreign key(schedule_id) references train_schedule(schedule_id),
 	foreign key(seat_id) references seat(seat_id),
 	constraint ticket_type_constraint check (ticket_type in ('Student', 'Elder', 'Adult', 'Children' ))
+);
+
+create table reservation(
+	ticket_id integer,
+	passenger_id integer,
+	reservation_date timestamp not null,
+	arrival_no integer not null,
+	departure_no integer not null,
+	foreign key (ticket_id) references ticket(ticket_id),
+	foreign key (passenger_id) references passenger(passenger_id),
+	primary key(ticket_id, passenger_id)
 );
 
 create table admin_railway(
