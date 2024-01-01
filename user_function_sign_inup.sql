@@ -5,7 +5,9 @@ ADD CONSTRAINT constraint_phone UNIQUE (phone);
 
 ALTER TABLE passenger 
 ADD CONSTRAINT constraint_email UNIQUE (email);
-------------
+
+
+--1. Sign Up function for passenger to have information to book ticket
 CREATE OR REPLACE FUNCTION Sign_Up(phone1 varchar, email1 varchar, password1 varchar, name1 varchar, dob1 date)
 RETURNS void AS
 $$
@@ -16,7 +18,8 @@ END;
 $$
 LANGUAGE plpgsql;
 
---- Sign In , show info if ok
+
+--2. Function Sign In , will show information if valid
 CREATE OR REPLACE FUNCTION Sign_In(name1 varchar, password1 varchar)
 RETURNS TABLE (
     passenger_id integer,
@@ -36,8 +39,8 @@ $$
 $$
 LANGUAGE sql;
 
-----Check admin 
 
+--3. Funciton to Check admin 
 CREATE OR REPLACE FUNCTION CheckAdmin(name1 varchar, password1 varchar)
 RETURNS VOID
 AS
@@ -74,7 +77,8 @@ END;
 $$
 LANGUAGE plpgsql;
 
--------return a number 
+
+-- 4. Function check admin return a number for many case when sign up by admin 
 CREATE OR REPLACE FUNCTION CheckAdmin(name1 varchar, password1 varchar)
 RETURNS integer
 AS
