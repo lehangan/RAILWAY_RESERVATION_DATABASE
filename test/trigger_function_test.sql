@@ -16,18 +16,16 @@ drop table seat;
 drop table ticket;
 
 alter table seat
-drop constraint fk_seat_train_id
+drop constraint fk_seat_train_id ;
 
 alter table train_schedule
 drop constraint fk_train_schedule_train_id ;
 
 alter table ticket 
-drop constraint fk_ticket_train_schedule_id;
+drop constraint fk_ticket_passenger_id ,
+drop constraint fk_ticket_seat_id ,
+drop constraint fk_ticket_train_schedule_id ;
 
-alter table train
-drop stop_train_id_fkey
-
-drop constraint stop_train_id_fkey on table stop
 select * from ticket
 select * from seat
 select * from passenger
@@ -69,7 +67,7 @@ INSERT INTO station(station_id, station_name, city) VALUES
 ('PAT' , 'Phan Thiet' , 'Binh Thuạn'),
 ('BTH' , 'Binh Thuan' , 'Binh Thuan'),
 ('BHO' , 'Bien Hoa' , 'Dong Nai'),
-('SGO' , 'Sai Gon' , 'Sai Gon')
+('SGO' , 'Sai Gon' , 'Sai Gon');
 
 insert into ticket(price, ticket_type, schedule_id, seat_id) values
 (50000, 'Student', 1, 1)
