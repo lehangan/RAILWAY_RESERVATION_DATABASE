@@ -1,11 +1,33 @@
-delete from train
-delete from station
-delete from train_schedule
-delete from stop
-delete from passenger
-delete from seat
-delete from ticket
+delete from train;
+delete from station;
+delete from train_schedule;
+delete from stop;
+delete from passenger;
+delete from seat;
+delete from ticket;
 
+drop table admin_railway
+drop table train;
+drop table station;
+drop table train_schedule;
+drop table stop;
+drop table passenger;
+drop table seat;
+drop table ticket;
+
+alter table seat
+drop constraint fk_seat_train_id
+
+alter table train_schedule
+drop constraint fk_train_schedule_train_id ;
+
+alter table ticket 
+drop constraint fk_ticket_train_schedule_id;
+
+alter table train
+drop stop_train_id_fkey
+
+drop constraint stop_train_id_fkey on table stop
 select * from ticket
 select * from seat
 select * from passenger

@@ -182,7 +182,7 @@ BEGIN
     INSERT INTO ticket(price, ticket_type, schedule_id, seat_id)
     VALUES(50000, 'Student', p_schedule_id, p_seat_id)
     RETURNING ticket_id INTO v_ticket_id;
-
+	
     SELECT s1.no, s2.no INTO from_no, to_no 
     FROM train_schedule ts, stop s1, stop s2
     WHERE ts.train_id = s1.train_id AND ts.station_from_id = s1.station_id
@@ -200,3 +200,4 @@ $$ LANGUAGE plpgsql;
 drop function reserve_ticket(int, int, int)
 
 select reserve_ticket(1, 5, 1);
+

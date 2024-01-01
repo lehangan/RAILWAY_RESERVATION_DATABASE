@@ -27,7 +27,7 @@ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE TRIGGER reset_serial_schedule_id
-BEFORE INSERT ON schedule_id
+BEFORE INSERT ON train_schedule
 EXECUTE FUNCTION reset_schedule_id();
 
 -- 3. Reset index for train (input from file doesn't increment train_id)
