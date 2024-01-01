@@ -149,7 +149,7 @@ BEGIN
 	AND ts.schedule_id = NEW.schedule_id
 	AND ts.train_id = s.train_id
   ) THEN
-    RAISE NOTICE 'This train do not have this schedule';
+    RAISE EXCEPTION 'This train do not have this schedule';
   END IF;
 
   RETURN NEW;
@@ -176,7 +176,7 @@ BEGIN
   JOIN stop s2 ON ts1.station_to_id = s2.station_id AND ts1.train_id = s2.train_id
   WHERE NOT( s2.no <= new.departure_no OR new.arrival_no <= s1.no );
   IF overlap_count > 0 THEN
-    RAISE NOTICE 'The new reservation overlaps with an existing reservation for the same train.';
+    RAISE EXCEPTION 'The new reservation overlaps with an existing reservation for the same train.';
   END IF;
 
   RETURN NEW;

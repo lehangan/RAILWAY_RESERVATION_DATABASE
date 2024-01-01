@@ -79,18 +79,40 @@ EXECUTE FUNCTION check_train_id_match();
 
 --------------------------------------------
 
-CREATE OR REPLACE FUNCTION client_get_schedule(schedule_id integer, day date)
-RETURNS setof train_schedule AS
+CREATE OR REPLACE FUNCTION client_get_schedule(from_id varchar(20), to_id varchar(20))
+RETURNS table (schedule_id int, from_station varchar(20), to_station varchar(20) ) 
+as
 $$
 BEGIN
 	RETURN QUERY
-	SELECT *
+	SELECT ts.schedule_id, ts.station_from_id, ts.station_to_id
 	FROM train_schedule ts
-	WHERE ts.schedule_id=$1 AND cast(ts.departure_time as date) =$2;
+	WHERE ts.station_from_id = $2 and ts.station_to_id = $3
 END;
 $$
 LANGUAGE plpgsql;
-select client_get_schedule(1, '2024-01-01');
+select client_get_schedule(1, 'HAN', 'LOB');
+
+drop function get_train_by_id( int)
+CREATE OR REPLACE FUNCTION get_train_by_id(train_id_param INTEGER)
+RETURNS TABLE (
+  train_id INTEGER,
+  train_name VARCHAR(10)
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    t.train_id,
+    t.train_name
+  FROM
+    train t
+  WHERE
+    t.train_id = train_id_param;
+
+  RETURN;
+END;
+$$ LANGUAGE plpgsql;
+select * from get_train_by_id(6)
 
 drop function client_get_schedule(integer,date )
 
@@ -323,3 +345,8 @@ select * from seat;
 select * from train;
 insert into train(train_id, train_name) values
 (1, 'HN1')
+
+drop trigger before_insert_check_train_id_match on ticket
+drop trigger reservation_insert_trigger on reservation
+
+
