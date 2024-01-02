@@ -36,7 +36,7 @@ BEGIN
     RETURN QUERY
     SELECT  station_from, station_to , departure_time, arrival_time  
     FROM train_schedule 
-    WHERE station_from_id = from_name AND station_to_id = to_name AND date(arrival_time) = depart_time;
+    WHERE station_from_id = from_name AND station_to_id = to_name AND date(departure_time) = depart_time;
 END
 $$
 LANGUAGE plpgsql;
