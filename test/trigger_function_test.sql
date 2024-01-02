@@ -32,6 +32,12 @@ drop constraint fk_ticket_passenger_id ,
 drop constraint fk_ticket_seat_id ,
 drop constraint fk_ticket_train_schedule_id ;
 
+drop function 
+explain analyze
+select * from show_schedule('Ha Noi' , 'Hai Phong', '2024-01-03');
+select book_ticket(4, 1, 1);
+select * from get_seat_empty(4);
+
 select * from ticket
 select * from seat
 select * from passenger
@@ -50,6 +56,8 @@ values
 ('1/1/2024 6:00','1/1/2024 5:45',3,	'LOB', 'HAN',11),
 ('1/1/2024 6:30','1/1/2024 6:10',3,	'GLA',	'LOB',11)
 
+insert into passenger(email, password, name, dob) values
+('lehangan30@gmail.com' , 'ngan' , 'le ha' , '2003-01-10')
 INSERT INTO station(station_id, station_name, city) VALUES
 ('HAN' , 'Ha Noi' , 'Ha Noi'),
 ('LOB' , 'Long Bien' , 'Ha Noi'),
@@ -78,7 +86,8 @@ INSERT INTO station(station_id, station_name, city) VALUES
 insert into ticket(price, ticket_type, schedule_id, seat_id, arrival_no, departure_no, passenger_id) values
 (50000, 'Student', 1, 1, 2, 1, 1)
 
-select delete_ticket(1);
+select book_ticket(4, 3, 1);
+
 CREATE OR REPLACE FUNCTION delete_ticket(ticket_id_arg integer)
 RETURNS void AS $$
 BEGIN

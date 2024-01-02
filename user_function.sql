@@ -23,7 +23,7 @@ LANGUAGE plpgsql;
 
 --2. Funciton get information about schedule 
 CREATE OR REPLACE FUNCTION show_schedule(station_from VARCHAR, station_to VARCHAR, depart_time DATE)
-RETURNS TABLE (from1 VARCHAR, to1 VARCHAR, depart TIMESTAMP, arrival TIMESTAMP)
+RETURNS TABLE (schedule_id1 int, from1 VARCHAR, to1 VARCHAR, depart TIMESTAMP, arrival TIMESTAMP)
 AS  
 $$ 
 DECLARE 
@@ -34,7 +34,7 @@ BEGIN
     SELECT check_station(station_to) INTO to_name;
 
     RETURN QUERY
-    SELECT  station_from, station_to , departure_time, arrival_time  
+    SELECT  schedule_id, station_from, station_to , departure_time, arrival_time  
     FROM train_schedule 
     WHERE station_from_id = from_name AND station_to_id = to_name AND date(departure_time) = depart_time;
 END
@@ -79,9 +79,11 @@ DECLARE
 	from_no int;
 	to_no int;
 	d date;
+	tr int:= (select train_id from train_schedule where schedule_id = p_schedule_id);
 BEGIN
+	
 	SELECT ts.arrival_time, s1.no, s2.no into d, from_no, to_no
-	FROM train_schedule ts, stop s1, stop s2
+	FROM train_schedule ts, stop s1, stop s2, train t
 	WHERE ts.schedule_id = p_schedule_id
 	AND ts.train_id = s1.train_id AND ts.station_from_id = s1.station_id
 	AND ts.train_id = s2.train_id AND ts.station_to_id = s2.station_id;
@@ -91,7 +93,7 @@ BEGIN
 	SELECT DISTINCT(s.seat_id), s.coach, s.number_seat
 	FROM seat s
 	JOIN ticket t ON s.seat_id= t.seat_id 
-	JOIN train_schedule ts ON ts.schedule_id = t.schedule_id
+	JOIN train_schedule ts ON ts.train_id = tr
 	WHERE t.schedule_id = $1  
 	OR (
 		t.schedule_id != $1
@@ -147,7 +149,7 @@ CREATE OR REPLACE FUNCTION price_per_time(departure timestamp, arrival timestamp
 	LANGUAGE plpgsql;
 
 --7. Get price by schedule_id
-CREATE OR REPLACE FUNCTION take_price(schedule_id1 integer)
+CREATE OR REPLACE FUNCTION take_price(schedule_id1 integer, seat_id1 integer )
 RETURNS integer
 AS 
 $$
@@ -155,23 +157,35 @@ DECLARE
     price_ticket integer;
     from_id varchar;
     to_id varchar;
+    class1 char;
+    coef float;
 BEGIN
-    -- Extract station_from_id and station_to_id based on the provided schedule_id
+    
+    SELECT class INTO class1 FROM seat WHERE seat_id = seat_id1;
+
     SELECT station_from_id, station_to_id INTO from_id, to_id
     FROM train_schedule
-    WHERE schedule_id  = schedule_id1; -- Replace with your actual column name
+    WHERE schedule_id = schedule_id1;
+
+    IF class1 = 'A' THEN 
+        coef := 1.2;
+    ELSIF class1 = 'B' THEN 
+        coef := 1;
+    ELSIF class1 = 'C' THEN 
+        coef := 0.9;
+    END IF;
 
     -- Call the price_per_time function with extracted station IDs
-    price_ticket := price_per_time(
-        (SELECT arrival_time FROM train_schedule WHERE schedule_id  = schedule_id1), -- Replace with your actual column name
-        (SELECT departure_time FROM train_schedule WHERE schedule_id  = schedule_id1) -- Replace with your actual column name
+    price_ticket := coef * price_per_time(
+        -- Replace with your actual column name
+        (SELECT departure_time FROM train_schedule WHERE schedule_id = schedule_id1), 
+        (SELECT arrival_time FROM train_schedule WHERE schedule_id = schedule_id1) -- Replace with your actual column name
     );
 
     RETURN price_ticket;
 END;
 $$
 LANGUAGE plpgsql;
-
 
 --8. Function book ticket for passenger
 CREATE OR REPLACE FUNCTION book_ticket(schedule_id1 integer, seat_id1 integer, passenger_id1 integer)
@@ -214,7 +228,7 @@ BEGIN
 
     -- Insert into the ticket table
     INSERT INTO ticket(price, ticket_type, schedule_id, seat_id, arrival_no, departure_no, passenger_id)
-    VALUES (price_ticket, ticket_type1, schedule_id1, seat_id1,from_no, to_no, passenger_id1);
+    VALUES (price_ticket, ticket_type1, schedule_id1, seat_id1, to_no, from_no, passenger_id1);
 END;
 $$
 LANGUAGE plpgsql;
