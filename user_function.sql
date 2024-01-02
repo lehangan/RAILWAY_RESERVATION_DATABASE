@@ -232,3 +232,22 @@ BEGIN
 END;
 $$
 LANGUAGE plpgsql;
+
+
+--9. Retrieve history reservation with passenger_id
+CREATE OR REPLACE FUNCTION get_history_booking(p_id int)
+RETURNS TABLE(
+	ticket_id int,
+	price int, 
+	ticket_type varchar(40),
+	seat_id int
+)AS
+$$
+BEGIN 
+    RETURN QUERY
+    SELECT t.ticket_id, t.price, t.ticket_type, t.seat_id
+    FROM ticket t
+    WHERE p_id = t.passenger_id;
+END
+$$
+LANGUAGE plpgsql;

@@ -166,3 +166,16 @@ BEGIN
 END
 $$;
 
+select * from ticket;
+
+select * from get_seat_booked(28);
+select * from get_seat_empty(24);
+
+select check_overlap_integer(1,4,4,5);
+
+SELECT ts.arrival_time, s1.no, s2.no 
+FROM train_schedule ts, stop s1, stop s2
+WHERE ts.train_id = 1
+AND ts.train_id = s1.train_id AND ts.station_from_id = s1.station_id
+AND ts.train_id = s2.train_id AND ts.station_to_id = s2.station_id
+AND ts.station_from_id = 'GLA'
