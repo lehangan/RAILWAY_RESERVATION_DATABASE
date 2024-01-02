@@ -147,7 +147,7 @@ CREATE OR REPLACE FUNCTION price_per_time(departure timestamp, arrival timestamp
 	LANGUAGE plpgsql;
 
 --7. Get price by schedule_id
-CREATE OR REPLACE FUNCTION take_price(schedule_id integer)
+CREATE OR REPLACE FUNCTION take_price(schedule_id1 integer)
 RETURNS integer
 AS 
 $$
@@ -159,18 +159,19 @@ BEGIN
     -- Extract station_from_id and station_to_id based on the provided schedule_id
     SELECT station_from_id, station_to_id INTO from_id, to_id
     FROM train_schedule
-    WHERE your_schedule_id_column = schedule_id; -- Replace with your actual column name
+    WHERE schedule_id  = schedule_id1; -- Replace with your actual column name
 
     -- Call the price_per_time function with extracted station IDs
     price_ticket := price_per_time(
-        (SELECT arrival_time FROM train_schedule WHERE your_schedule_id_column = schedule_id), -- Replace with your actual column name
-        (SELECT departure_time FROM train_schedule WHERE your_schedule_id_column = schedule_id) -- Replace with your actual column name
+        (SELECT arrival_time FROM train_schedule WHERE schedule_id  = schedule_id1), -- Replace with your actual column name
+        (SELECT departure_time FROM train_schedule WHERE schedule_id  = schedule_id1) -- Replace with your actual column name
     );
 
     RETURN price_ticket;
 END;
 $$
 LANGUAGE plpgsql;
+
 
 --8. Function book ticket for passenger
 CREATE OR REPLACE FUNCTION book_ticket(schedule_id1 integer, seat_id1 integer, passenger_id1 integer)
@@ -187,9 +188,9 @@ DECLARE
 BEGIN
     standard_price := take_price(schedule_id1);
 	
-	SELECT s1.no, s2.no from_no, to_no
+	SELECT s1.no, s2.no into from_no, to_no
 	FROM train_schedule ts, stop s1, stop s2
-	WHERE ts.schedule_id = p_schedule_id
+	WHERE ts.schedule_id = schedule_id1
 	AND ts.train_id = s1.train_id AND ts.station_from_id = s1.station_id
 	AND ts.train_id = s2.train_id AND ts.station_to_id = s2.station_id;
 	
