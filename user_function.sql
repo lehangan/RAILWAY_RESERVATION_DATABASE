@@ -207,7 +207,7 @@ DECLARE
 	new_ticket_id integer; 
 BEGIN
 	IF seat_id1 in (select seat_id from get_seat_booked(schedule_id1)) THEN
-		RAISE EXCEPTION 'This seat is booked %', seat_id1 ;
+		RAISE EXCEPTION 'This seat id: %  is booked ', seat_id1 ;
 	
 	ELSE
     standard_price := take_price(schedule_id1,seat_id1);

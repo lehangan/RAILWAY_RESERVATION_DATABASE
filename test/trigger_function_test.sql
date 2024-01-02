@@ -5,6 +5,7 @@ delete from stop;
 delete from passenger;
 delete from seat;
 delete from ticket;
+delete from admin_railway;
 
 drop table admin_railway
 drop table train;
@@ -32,7 +33,7 @@ drop constraint fk_ticket_passenger_id ,
 drop constraint fk_ticket_seat_id ,
 drop constraint fk_ticket_train_schedule_id ;
 
-drop function 
+DROP FUNCTION sign_up(character varying,character varying,character varying,character varying,date)
 explain analyze
 select * from show_schedule('Ha Noi' , 'Hai Phong', '2024-01-03');
 select book_ticket(4, 1, 1);

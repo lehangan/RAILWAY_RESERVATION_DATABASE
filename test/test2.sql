@@ -5,11 +5,13 @@ select * from stop;
 select * from train_schedule;
 select * from seat;
 select * from ticket;
+select * from admin_railway;
+
 ---- 1. Insert all data to table
 ---- Trigger auto add seat
 select * from seat;
 
---- Trigger can't add seat 
+--- Trigger can't add seat when full
 insert into seat(coach, number_seat, train_id, class) 
 values(10, 1, 1, 'A');
 
@@ -38,15 +40,15 @@ select show_schedule('Ha Noi' , 'Hai Phong' , '2024-01-05');
 
 --2.3 Function to get all seat with schedule id
 
-select * from get_seat_all(24);
-select * from get_seat_empty(24);
+select * from get_seat_all(44);
+select * from get_seat_empty(44);
 
 -- 2.4 Funciton to get standard price of ticket by provide schedule_id, seat_id
-select take_price(24, 1);
+select take_price(44, 1);
 
 -- 2.5 Function to book ticket when passenger provide schedule_id, seat_id, and passenger_id for 
 -- having sale or discount
-select book_ticket(24, 1, 1);
+select book_ticket(44, 1, 1);
 
 ---Query the reservation history by provide passenger_id
 
@@ -54,34 +56,37 @@ select * from get_history_booking(1);
 
 ---Query the reservation history by provide ticket_id
 
-select * from get_history_booking_ticket(40);
+select * from get_history_booking_ticket(43);
 
-select * from get_seat_empty(24);
+-- We check seat empty when having some one reserve
+select * from get_seat_empty(44);
 
---- If we try to book ticket with same schedule and same seat ?
+--- If someone try to book ticket with same schedule and same seat ?
 
-select book_ticket(24,1,2);
+select book_ticket(44,1,2);
 
---- First there are a people booking from Hanoi to Hai Phong (from_station is 1, to_station is 5)
+--- First there is a people booking from Hanoi to Hai Phong (from_station is 1, to_station is 5)
 --- Another passenger will query buy same ticket from Ha Noi to Long Bien ( from_station is 1, to_station is 2)
---- with same seat ?
+--- with same seat ? Can it be reserved ?
 select show_schedule('Ha Noi' , 'Long Bien' , '2024-01-05');
 
-select * from get_seat_empty(21);
+select * from get_seat_empty(41);
 
 -- Function to book ticket when passenger provide schedule_id, seat_id, and passenger_id and return ticket_id
-select book_ticket(21, 2, 2);
+select book_ticket(41, 2, 2);
 select * from ticket;
 
+-- Now some one want to reserve ticket from Hai Duong to Hai Phong 
 select show_schedule('Hai Duong' , 'Hai Phong' , '2024-01-05');
-select * from get_seat_empty(30);
-select book_ticket(30, 2, 3);
+select * from get_seat_empty(50);
+
+select book_ticket(50, 2, 3);
 
 select * from ticket;
 
--- If we refund ticket with ticket_id
+-- If people refund ticket with ticket_id
 
-select refund_ticket(42);
+select refund_ticket(45);
 
 --- Function sign-in , sign-up
 -- Sign Up function for passenger to have information to book ticket provide
@@ -91,6 +96,7 @@ select Sign_Up('09977519479','lehangan30@gmail.com' ,'lehangan', 'Le Ha Ngan', '
 
 select Sign_In('lehangan30@gmail.com' , 'lehangan');
 
-select CheckAdmin('admin1' , 'password1');
+select * from admin_railway
+select CheckAdmin('admin1' , 'password5');
 
 
