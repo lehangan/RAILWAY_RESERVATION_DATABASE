@@ -31,4 +31,4 @@ INSERT INTO station(station_id, station_name, city) VALUES
 -----------------------------------------
 
 COPY stop FROM 'E:\railway_project_database_sql\data\stop.txt' WITH DELIMITER E',';
-COPY train_schedule FROM 'E:\railway_project_database_sql\data\train_schedule2.txt' WITH DELIMITER E'\t';
+COPY train_schedule FROM 'E:\railway_project_database_sql\data\train_schedule.txt' WITH DELIMITER E'\t';
