@@ -105,6 +105,7 @@ END;
 $$
 LANGUAGE plpgsql;
 
+
 --5. Function to get all seat are empty with schedule_id
 CREATE OR REPLACE FUNCTION get_seat_empty(schedule_id integer)
 RETURNS TABLE(
@@ -122,6 +123,7 @@ BEGIN
 END;
 $$
 LANGUAGE plpgsql;
+
 
 --6. Calculate price depend on time in train_schedule 
 CREATE OR REPLACE FUNCTION price_per_time(departure timestamp, arrival timestamp)
@@ -147,6 +149,8 @@ CREATE OR REPLACE FUNCTION price_per_time(departure timestamp, arrival timestamp
 	END;
 	$$
 	LANGUAGE plpgsql;
+
+
 
 --7. Get price by schedule_id
 CREATE OR REPLACE FUNCTION take_price(schedule_id1 integer, seat_id1 integer )
@@ -187,6 +191,7 @@ END;
 $$
 LANGUAGE plpgsql;
 
+
 --8. Function book ticket for passenger
 CREATE OR REPLACE FUNCTION book_ticket(schedule_id1 integer, seat_id1 integer, passenger_id1 integer)
 RETURNS void 
@@ -200,7 +205,7 @@ DECLARE
     from_no integer;
 	to_no integer;
 BEGIN
-    standard_price := take_price(schedule_id1);
+    standard_price := take_price(schedule_id1,seat_id1);
 	
 	SELECT s1.no, s2.no into from_no, to_no
 	FROM train_schedule ts, stop s1, stop s2
@@ -233,7 +238,6 @@ END;
 $$
 LANGUAGE plpgsql;
 
-
 --9. Retrieve history reservation with passenger_id
 CREATE OR REPLACE FUNCTION get_history_booking(p_id int)
 RETURNS TABLE(
@@ -251,3 +255,4 @@ BEGIN
 END
 $$
 LANGUAGE plpgsql;
+

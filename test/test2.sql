@@ -25,7 +25,7 @@ values
 ( '2024-01-03 08:00' , '2024-01-03 07:00' , 5, 'BHO' , 'SGO' , 20),
 ( '2024-01-03 09:00' , '2024-01-03 08:00' , 5, 'BHO' , 'BHO' , 20);
 
----- 2. User function
+---- 2. User function - Book
 
 ---2.1 Function to query id of station with station name
 
@@ -69,3 +69,10 @@ select * from ticket;
 select show_schedule('Hai Duong' , 'Hai Phong' , '2024-01-03');
 select * from get_seat_empty(30);
 select book_ticket(30, 2, 3);
+
+--- Function sign-in , sign-up
+-- 1.Function sign-up
+
+
+
+
