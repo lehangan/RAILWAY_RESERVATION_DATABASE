@@ -1,10 +1,26 @@
 --1. Sign Up function for passenger to have information to book ticket
-CREATE OR REPLACE FUNCTION Sign_Up(phone1 varchar, email1 varchar, password1 varchar, name1 varchar, dob1 date)
-RETURNS void AS
+CREATE OR REPLACE FUNCTION Sign_Up(
+    phone1 varchar, 
+    email1 varchar, 
+    password1 varchar, 
+    name1 varchar, 
+    dob1 date
+)
+RETURNS boolean AS
 $$
 BEGIN
-    INSERT INTO passenger( phone, email, password, name, dob) 
-    VALUES(phone1, email1, password1, name1, dob1);
+    BEGIN
+        INSERT INTO passenger(phone, email, password, name, dob) 
+        VALUES(phone1, email1, password1, name1, dob1);
+        -- If the INSERT statement executed successfully, print a notice and return true
+        RAISE NOTICE 'User signed up successfully';
+        RETURN true;
+    EXCEPTION
+        -- If there is an exception (e.g., unique constraint violation), print a notice and return false
+        WHEN others THEN
+            RAISE NOTICE 'Failed to sign up user: %', SQLERRM;
+            RETURN false;
+    END;
 END;
 $$
 LANGUAGE plpgsql;

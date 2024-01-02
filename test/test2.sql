@@ -34,7 +34,7 @@ select check_station('Hai Phong');
 -- 2.2 Funciton get information about schedule return( schedule_id,staion_from_ id, station_to_id, 
 -- departure_time, arrival_time)
 
-select show_schedule('Ha Noi' , 'Hai Phong' , '2024-01-03');
+select show_schedule('Ha Noi' , 'Hai Phong' , '2024-01-05');
 
 --2.3 Function to get all seat with schedule id
 
@@ -48,28 +48,40 @@ select take_price(24, 1);
 -- having sale or discount
 select book_ticket(24, 1, 1);
 
----Query the reservation history
+---Query the reservation history by provide passenger_id
 
 select * from get_history_booking(1);
 
+---Query the reservation history by provide ticket_id
+
+select * from get_history_booking_ticket(40);
+
 select * from get_seat_empty(24);
+
+--- If we try to book ticket with same schedule and same seat ?
+
+select book_ticket(24,1,2);
 
 --- First there are a people booking from Hanoi to Hai Phong (from_station is 1, to_station is 5)
 --- Another passenger will query buy same ticket from Ha Noi to Long Bien ( from_station is 1, to_station is 2)
 --- with same seat ?
-select show_schedule('Ha Noi' , 'Long Bien' , '2024-01-03');
+select show_schedule('Ha Noi' , 'Long Bien' , '2024-01-05');
 
 select * from get_seat_empty(21);
 
--- Function to book ticket when passenger provide schedule_id, seat_id, and passenger_id for 
+-- Function to book ticket when passenger provide schedule_id, seat_id, and passenger_id and return ticket_id
 select book_ticket(21, 2, 2);
 select * from ticket;
 
-select show_schedule('Hai Duong' , 'Hai Phong' , '2024-01-03');
+select show_schedule('Hai Duong' , 'Hai Phong' , '2024-01-05');
 select * from get_seat_empty(30);
 select book_ticket(30, 2, 3);
 
 select * from ticket;
+
+-- If we refund ticket with ticket_id
+
+select refund_ticket(42);
 
 --- Function sign-in , sign-up
 -- Sign Up function for passenger to have information to book ticket provide
@@ -78,5 +90,7 @@ select * from ticket;
 select Sign_Up('09977519479','lehangan30@gmail.com' ,'lehangan', 'Le Ha Ngan', '2003-02-02');
 
 select Sign_In('lehangan30@gmail.com' , 'lehangan');
+
+select CheckAdmin('admin1' , 'password1');
 
 

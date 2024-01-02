@@ -194,7 +194,7 @@ LANGUAGE plpgsql;
 
 --8. Function book ticket for passenger
 CREATE OR REPLACE FUNCTION book_ticket(schedule_id1 integer, seat_id1 integer, passenger_id1 integer)
-RETURNS void 
+RETURNS integer
 AS 
 $$
 DECLARE
@@ -204,9 +204,10 @@ DECLARE
     ages integer;
     from_no integer;
 	to_no integer;
+	new_ticket_id integer; 
 BEGIN
 	IF seat_id1 in (select seat_id from get_seat_booked(schedule_id1)) THEN
-		RAISE EXCEPTION 'This seat is booked %d', seat_id1 ;
+		RAISE EXCEPTION 'This seat is booked %', seat_id1 ;
 	
 	ELSE
     standard_price := take_price(schedule_id1,seat_id1);
@@ -237,8 +238,10 @@ BEGIN
 
     -- Insert into the ticket table
     INSERT INTO ticket(price, ticket_type, schedule_id, seat_id, arrival_no, departure_no, passenger_id)
-    VALUES (price_ticket, ticket_type1, schedule_id1, seat_id1, to_no, from_no, passenger_id1);
+    VALUES (price_ticket, ticket_type1, schedule_id1, seat_id1, to_no, from_no, passenger_id1)
+	RETURNING ticket_id INTO new_ticket_id;
 	
+	return new_ticket_id;
 	END IF;
 END;
 $$
@@ -262,3 +265,44 @@ END
 $$
 LANGUAGE plpgsql;
 
+
+--10. Retrieve history reservation with ticket_id
+CREATE OR REPLACE FUNCTION get_history_booking_ticket(p_ticket_id int)
+RETURNS TABLE(
+	ticket_id int,
+	price int, 
+	ticket_type varchar(40),
+	seat_id int
+)AS
+$$
+BEGIN 
+    RETURN QUERY
+    SELECT t.ticket_id, t.price, t.ticket_type, t.seat_id
+    FROM ticket t
+    WHERE p_ticket_id = t.ticket_id;
+END
+$$
+LANGUAGE plpgsql;
+
+
+--11. Function refund ticket with ticket_id 
+CREATE OR REPLACE FUNCTION refund_ticket(p_ticket_id INT)
+RETURNS BOOLEAN AS $$
+DECLARE
+  v_arrival_time date;
+BEGIN
+  -- Get the arrival_time for the given ticket
+  SELECT cast(ts.departure_time as date) INTO v_arrival_time
+  FROM train_schedule ts
+  JOIN ticket t ON ts.schedule_id = t.schedule_id
+  WHERE t.ticket_id = p_ticket_id;
+
+  -- If the arrival_time is less than the current time, refund the ticket
+  IF cast( v_arrival_time as date ) > current_date THEN
+    DELETE FROM ticket WHERE ticket_id = p_ticket_id;
+	RETURN TRUE;
+  ELSE
+    RETURN FALSE;
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
