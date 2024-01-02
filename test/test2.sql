@@ -23,7 +23,7 @@ values( '2024-01-03 08:00' , '2024-01-03 07:00' , 1, 'GLA' , 'HAN' , 20);
 insert into train_schedule(arrival_time, departure_time, track_number, station_to_id, station_from_id, train_id)
 values
 ( '2024-01-03 08:00' , '2024-01-03 07:00' , 5, 'BHO' , 'SGO' , 20),
-( '2024-01-03 09:00' , '2024-01-03 08:00' , 5, 'BHO' , 'BHO' , 20);
+( '2024-01-03 09:00' , '2024-01-03 08:00' , 5, 'BTO' , 'BHO' , 20);
 
 ---- 2. User function - Book
 
@@ -50,8 +50,7 @@ select book_ticket(24, 1, 1);
 
 ---Query the reservation history
 
-select * from ticket
-where passenger_id = 1;
+select * from get_history_booking(1);
 
 select * from get_seat_empty(24);
 
@@ -71,8 +70,11 @@ select * from get_seat_empty(30);
 select book_ticket(30, 2, 3);
 
 --- Function sign-in , sign-up
--- 1.Function sign-up
+-- Sign Up function for passenger to have information to book ticket provide
+-- ( phone or email, password, name, dob)
 
+select Sign_Up('09977519479','lehangan30@gmail.com' ,'lehangan', 'Le Ha Ngan', '2003-02-02');
 
+select Sign_In('lehangan30@gmail.com' , 'lehangan');
 
 
