@@ -41,7 +41,7 @@ select show_schedule('Ha Noi' , 'Hai Phong' , '2024-01-03');
 select * from get_seat_all(24);
 select * from get_seat_empty(24);
 
--- 2.4 Funciton to get price of by provide schedule_id, seat_id
+-- 2.4 Funciton to get standard price of ticket by provide schedule_id, seat_id
 select take_price(24, 1);
 
 -- 2.5 Function to book ticket when passenger provide schedule_id, seat_id, and passenger_id for 
@@ -68,6 +68,8 @@ select * from ticket;
 select show_schedule('Hai Duong' , 'Hai Phong' , '2024-01-03');
 select * from get_seat_empty(30);
 select book_ticket(30, 2, 3);
+
+select * from ticket;
 
 --- Function sign-in , sign-up
 -- Sign Up function for passenger to have information to book ticket provide

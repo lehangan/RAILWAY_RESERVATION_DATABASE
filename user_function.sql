@@ -205,6 +205,10 @@ DECLARE
     from_no integer;
 	to_no integer;
 BEGIN
+	IF seat_id1 in (select seat_id from get_seat_booked(schedule_id1)) THEN
+		RAISE EXCEPTION 'This seat is booked %d', seat_id1 ;
+	
+	ELSE
     standard_price := take_price(schedule_id1,seat_id1);
 	
 	SELECT s1.no, s2.no into from_no, to_no
@@ -234,6 +238,8 @@ BEGIN
     -- Insert into the ticket table
     INSERT INTO ticket(price, ticket_type, schedule_id, seat_id, arrival_no, departure_no, passenger_id)
     VALUES (price_ticket, ticket_type1, schedule_id1, seat_id1, to_no, from_no, passenger_id1);
+	
+	END IF;
 END;
 $$
 LANGUAGE plpgsql;
