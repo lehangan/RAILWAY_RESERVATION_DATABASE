@@ -286,19 +286,20 @@ LANGUAGE plpgsql;
 
 
 --11. Function refund ticket with ticket_id 
-CREATE OR REPLACE FUNCTION refund_ticket(p_ticket_id INT)
+CREATE OR REPLACE FUNCTION refund_ticket(p_ticket_id INT, p_passenger_id int)
 RETURNS BOOLEAN AS $$
 DECLARE
-  v_arrival_time date;
+  v_arrival_time timestamp;
 BEGIN
   -- Get the arrival_time for the given ticket
-  SELECT cast(ts.departure_time as date) INTO v_arrival_time
+  SELECT ts.departure_time INTO v_arrival_time
   FROM train_schedule ts
   JOIN ticket t ON ts.schedule_id = t.schedule_id
-  WHERE t.ticket_id = p_ticket_id;
+  WHERE t.ticket_id = p_ticket_id
+  AND t.passenger_id = p_passenger_id;
 
   -- If the arrival_time is less than the current time, refund the ticket
-  IF cast( v_arrival_time as date ) > current_date THEN
+  IF v_arrival_time - current_timestamp > interval '4 hours' THEN
     DELETE FROM ticket WHERE ticket_id = p_ticket_id;
 	RETURN TRUE;
   ELSE

@@ -103,9 +103,9 @@ select * from ticket;
 select refund_ticket(45);
 
 -- case with time not before departure date
-select show_schedule('Hai Duong' , 'Hai Phong' , '2024-01-03');
-select book_ticket(30, 2, 3);
-select refund_ticket(47);
+select show_schedule('Gia Lam' , 'Hai Phong' , '2024-01-03');
+select book_ticket(1249, 1, 1);
+select refund_ticket(49,1);
 
 --- Function sign-in , sign-up
 -- Sign Up function for passenger to have information to book ticket provide
