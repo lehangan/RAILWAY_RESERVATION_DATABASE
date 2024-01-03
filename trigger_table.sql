@@ -43,7 +43,7 @@ DECLARE
 BEGIN
     -- Check if total seats exceed the limit
     IF (a > 299) AND (TG_TABLE_NAME ILIKE 'SEAT') THEN
-        RAISE NOTICE 'CANNOT INSERT/DELETE SEAT (%). Total seats for train_id % exceeds the limit.', a, NEW.train_id;
+        RAISE NOTICE 'CANNOT INSERT SEAT (%). Total seats for train_id % exceeds the limit.', a, NEW.train_id;
         RETURN NULL;
     END IF;
 
