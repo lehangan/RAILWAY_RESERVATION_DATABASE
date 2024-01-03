@@ -16,8 +16,12 @@ drop table passenger;
 drop table seat;
 drop table ticket;
 
+drop function refund_ticket(int);
 alter table seat
 drop constraint fk_seat_train_id ;
+
+
+select '2024-01-03 7:00:00' - '2024-01-03 8:00:00';
 
 ALTER TABLE passenger 
 ADD CONSTRAINT constraint_phone UNIQUE (phone);
