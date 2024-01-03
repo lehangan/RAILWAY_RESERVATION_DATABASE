@@ -70,7 +70,7 @@ select * from get_history_booking(1);
 
 ---Query the reservation history by provide ticket_id
 
-select * from get_history_booking_ticket(43);
+select * from get_history_booking_ticket(53);
 
 -- We check seat empty when having some one reserve
 select * from get_seat_empty(44);
@@ -79,7 +79,10 @@ select * from get_seat_empty(44);
 
 select book_ticket(44,1,2);
 
+select * from ticket;
+
 -- Case 2: Check overlap (true) - Cannot booked
+
 --- First there is a people booking from Hanoi to Hai Phong (from_station is 1, to_station is 5)
 --- Another passenger will query buy same ticket from Ha Noi to Long Bien ( from_station is 1, to_station is 2)
 --- with same seat ? Can it be reserved ?
@@ -87,13 +90,18 @@ select show_schedule('Ha Noi' , 'Long Bien' , '2024-01-05');
 
 select * from get_seat_empty(41);
 
+select book_ticket(41, 1,2);
+
+--- Person book another ticket with different seat
+select book_ticket(41,2,2);
+
+
 -- Case 3: Check overlap (false) - Can booked
--- First some one booked from (Hanoi to Long Bien, 1-2)
--- Function to book ticket when passenger provide schedule_id, seat_id, and passenger_id and return ticket_id
-select book_ticket(41, 2, 2);
+-- First some one booked from (Hanoi to Long Bien, 1-2 , seat 1-2)
+
 select * from ticket;
 
--- Second: Now some one want to reserve ticket from Hai Duong to Hai Phong (4-5)
+-- Second: Now some one want to reserve ticket from Hai Duong to Hai Phong (2-3)
 select show_schedule('Hai Duong' , 'Hai Phong' , '2024-01-05');
 select * from get_seat_empty(50);
 
@@ -104,22 +112,25 @@ select * from ticket;
 -- Third some one want to reserve ticket from Long Bien to Hai Duong (2-4) 
 
 select show_schedule('Long Bien' , 'Hai Duong' , '2024-01-05');
-select * from get_seat_empty(50);
+select * from get_seat_empty(46);
 
-select book_ticket(50, 2, 3);
+select book_ticket(46, 2, 4);
 
 select * from ticket;
-
 
 -- Case 4: When booking with time departure - time current > 15 minitues (can book)
 select show_schedule('Hai Phong' , 'Ha Noi' , '2024-01-05');
 
-select book_ticket(2484, 10, 3);
+select * from get_seat_empty(2484);
+
+select book_ticket(2484, 301, 3);
 
 -- Case 5: When booking with time departure - time current < 15 minutes (can not book)
-select show_schedule('Hai Phong' , 'Ha Noi' , '2024-01-02');
+select show_schedule('Hai Phong' , 'Ha Noi' , '2024-01-01');
 
-select book_ticket(2454, 1, 3);
+select * from get_seat_empty(2444);
+
+select book_ticket(2454, 302, 3);
 
 
 -- 2.6 Function refund ticket
