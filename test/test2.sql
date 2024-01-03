@@ -24,10 +24,18 @@ values(1, 1, 31, 'A');
 --- Trigger can't add if conflict (track number)
 select * from train_schedule;
 
+-- Because track 1 in this time have train id 1
+select * from train_schedule
+where track_number = 1 ;
+
 insert into train_schedule(arrival_time, departure_time, track_number, station_to_id, station_from_id, train_id)
 values( '2024-01-03 08:00' , '2024-01-03 07:00' , 1, 'GLA' , 'HAN' , 20);
 
 --- Trigger can't add if no enough time
+--- We check track_number first
+select * from train_schedule
+where track_number = 5 ;
+
 insert into train_schedule(arrival_time, departure_time, track_number, station_to_id, station_from_id, train_id)
 values
 ( '2024-01-03 08:00' , '2024-01-03 07:00' , 5, 'BHO' , 'SGO' , 20),
@@ -90,9 +98,14 @@ select book_ticket(50, 2, 3);
 
 select * from ticket;
 
--- If people refund ticket with ticket_id
-
+-- If people refund ticket with ticket_id 
+-- case with time before departure date
 select refund_ticket(45);
+
+-- case with time not before departure date
+select show_schedule('Hai Duong' , 'Hai Phong' , '2024-01-03');
+select book_ticket(30, 2, 3);
+select refund_ticket(47);
 
 --- Function sign-in , sign-up
 -- Sign Up function for passenger to have information to book ticket provide
