@@ -48,6 +48,12 @@ select * from train
 select * from stop
 select * from train_schedule
 
+delete from seat 
+where train_id = 31;
+
+delete from train
+where train_id = 31;
+
 drop function book_ticket(integer,  integer,  integer);
 COPY passenger FROM 'E:\railway_project_database_sql\data\passenger.txt' WITH DELIMITER E'\t';
 COPY train FROM 'E:\railway_project_database_sql\data\train.txt' WITH DELIMITER E',';
@@ -405,16 +411,13 @@ insert into passenger( phone, email, password, name, dob) values
 
 ----------------------------------------
 
+select show_schedule('Ha Noi' , 'Hai Phong' , '2024-01-05');
 
-delete from seat;
-delete from train;
 
-select * from seat;
-select * from train;
-insert into train(train_id, train_name) values
-(1, 'HN1')
 
-drop trigger before_insert_check_train_id_match on ticket
-drop trigger reservation_insert_trigger on reservation
+
+
+
+
 
 

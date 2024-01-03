@@ -7,13 +7,19 @@ select * from seat;
 select * from ticket;
 select * from admin_railway;
 
+
 ---- 1. Insert all data to table
 ---- Trigger auto add seat
-select * from seat;
+
+insert into train(train_name) values('HN10');
+
+select s.* from seat s, train t
+where t.train_id = s.train_id
+and t.train_name = 'HN10';
 
 --- Trigger can't add seat when full
 insert into seat(coach, number_seat, train_id, class) 
-values(10, 1, 1, 'A');
+values(1, 1, 31, 'A');
 
 --- Trigger can't add if conflict (track number)
 select * from train_schedule;
