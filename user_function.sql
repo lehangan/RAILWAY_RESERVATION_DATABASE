@@ -205,6 +205,7 @@ DECLARE
     from_no integer;
 	to_no integer;
 	new_ticket_id integer; 
+	depart_time timestamp;
 BEGIN
 	IF seat_id1 in (select seat_id from get_seat_booked(schedule_id1)) THEN
 		RAISE EXCEPTION 'This seat id: %  is booked ', seat_id1 ;
@@ -212,12 +213,15 @@ BEGIN
 	ELSE
     standard_price := take_price(schedule_id1,seat_id1);
 	
-	SELECT s1.no, s2.no into from_no, to_no
+	SELECT s1.no, s2.no, ts.departure_time into from_no, to_no, depart_time
 	FROM train_schedule ts, stop s1, stop s2
 	WHERE ts.schedule_id = schedule_id1
 	AND ts.train_id = s1.train_id AND ts.station_from_id = s1.station_id
 	AND ts.train_id = s2.train_id AND ts.station_to_id = s2.station_id;
 	
+	IF depart_time - current_timestamp < interval '15 minutes' THEN 
+		RAISE EXCEPTION 'Time making reservation is closed' ;	
+	ELSE
     SELECT EXTRACT(YEAR FROM AGE(NOW(), dob)) INTO ages
     FROM passenger
     WHERE passenger_id = passenger_id1;
@@ -242,6 +246,7 @@ BEGIN
 	RETURNING ticket_id INTO new_ticket_id;
 	
 	return new_ticket_id;
+	END IF;
 	END IF;
 END;
 $$
